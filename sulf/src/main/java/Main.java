@@ -1,3 +1,4 @@
+import controller.MainController;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -7,13 +8,12 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.Scanner;
 
-@ComponentScan("ru.sks")
+@ComponentScan("")
 public class Main {
 
     public static void main(String[] args) {
-        System.setProperty("java.awt.headless", "false");
         ConfigurableApplicationContext app = SpringApplication.run(Main.class, args);
-        Manager managerImpl = app.getBean(Manager.class);
+        MainController managerImpl = app.getBean(MainController.class);
 
         Scanner sc = new Scanner(System.in);
 
