@@ -5,9 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "category_budgets")
@@ -17,8 +15,10 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class CategoryBudget extends AbstractEntity {
     @Column
-    private Double budgetSize;
+    private Float budgetSize;
     @Column
     private String categoryName;
-    dobavit user
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User owner;
 }

@@ -6,9 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "financial_operations")
@@ -20,8 +18,10 @@ public class FinancialOperation extends AbstractEntity {
     @Column
     private String categoryName;
     @Column
-    private Double price;
+    private Float price;
     @Column
     private FinancialOperationType operationType;
-    dobavit user
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User owner;
 }

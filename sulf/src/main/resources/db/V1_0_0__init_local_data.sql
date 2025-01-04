@@ -9,18 +9,17 @@ create table users
 CREATE TABLE category_budgets
 (
     id      BIGSERIAL    NOT NULL,
-    name    VARCHAR(128) NOT NULL,
+    budget_size  real NOT NULL,
+    category_name VARCHAR(128) not null,
     user_id bigint REFERENCES users (id) on delete cascade,
-    CONSTRAINT roles_pk PRIMARY KEY (id)
+    CONSTRAINT category_budgets_pk PRIMARY KEY (id)
 );
 
 create table financial_operations
 (
     id                  BIGSERIAL           NOT NULL,
     user_id     bigint              not null references users (id),
-    title       VARCHAR(64)         not null,
-    object_type varchar(32) not null,
-    required_scope varchar(32) not null,
-    info        VARCHAR(255),
-    CONSTRAINT info_cards_pk primary key (unique_code)
+    category_name       VARCHAR(64)         not null,
+    price  real NOT NULL,
+    CONSTRAINT financial_operations_pk primary key (id)
 );
