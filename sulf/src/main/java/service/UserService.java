@@ -8,6 +8,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class UserService {
     @Autowired
@@ -19,12 +21,19 @@ public class UserService {
     }
 
     public void login(String login, String password) {
-        User user = userDao.findByLogin(login);
+        Optional<User> userOp = userDao.findByLogin(login);
+
+        if (userOp.isEmpty()) {
+            throw new IllegalArgumentException(login + " не зарегистрирован");
+        }
+
+        User user = userOp.get();
+
         if (user.getPassword().equals(password)) {
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
             SecurityContextHolder.getContext().setAuthentication(auth);
         } else {
-            throw new AuthenticationServiceException("Неверный логин или пароль");
+            throw new AuthenticationServiceException("Неверный пароль");
         }
     }
 
@@ -33,10 +42,22 @@ public class UserService {
     }
 
     public User getCurrentUser() {
-        return userDao.findByLogin(SecurityContextHolder.getContext().getAuthentication().getName());
+        Optional<User> userOp =  userDao.findByLogin(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if (userOp.isEmpty()) {
+            throw new IllegalArgumentException("Вы не авторизованы не авторизованы");
+        }
+
+        return userOp.get();
     }
 
     public User getUserByLogin(String userLogin) {
-        return userDao.findByLogin(userLogin);
+        Optional<User> userOp =  userDao.findByLogin(userLogin);
+
+        if (userOp.isEmpty()) {
+            throw new IllegalArgumentException(userLogin + " пользователь не найден");
+        }
+
+        return userOp.get();
     }
 }

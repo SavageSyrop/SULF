@@ -65,28 +65,46 @@ public class MainController {
 
     @PreAuthorize("isAuthenticated()")
     public void editBudgetCategory(String category, float price) {
+        User user = userService.getCurrentUser();
+        CategoryBudget categoryBudget = financialOperationService.getCategoryByUser(user.getId(), category);
+        categoryBudget.setBudgetSize(price);
+        financialOperationService.addBudgetCategory(categoryBudget);
 
     }
 
     @PreAuthorize("isAuthenticated()")
     public List<FinancialOperation> getAllIncomeOperationsByCurrentUser() {
+        User user = userService.getCurrentUser();
+
+        return financialOperationService.getAllIncomeOperationsByCurrentUser(user);
     }
 
     @PreAuthorize("isAuthenticated()")
     public List<FinancialOperation> getAllExpenseOperationsByCurrentUser() {
+        User user = userService.getCurrentUser();
+
+        return financialOperationService.getAllExpenseOperationsByCurrentUser(user);
     }
 
     @PreAuthorize("isAuthenticated()")
     public List<FinancialOperation> getAllOperationsByCurrentUser() {
+        User user = userService.getCurrentUser();
+
+        return financialOperationService.getAllOperationsByCurrentUser(user);
     }
 
     @PreAuthorize("isAuthenticated()")
     public List<FinancialOperation> getAllOperationsBySelectedCategory() {
+        User user = userService.getCurrentUser();
+
+        return financialOperationService.getAllOperationsBySelectedCategory(user);
     }
-    
 
     @PreAuthorize("isAuthenticated()")
     public Map<String, Float> getAllBudgetOverflows() {
+        User user = userService.getCurrentUser();
+
+        return financialOperationService.getAllBudgetOverflows(user);
     }
 
     @PreAuthorize("isAuthenticated()")
