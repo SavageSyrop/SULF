@@ -19,6 +19,7 @@ public class FinancialOperation extends AbstractEntity {
     private String categoryName;
     @Column
     private Float price;
+    @Enumerated(EnumType.STRING)
     @Column
     private FinancialOperationType operationType;
     @ManyToOne(fetch = FetchType.LAZY)

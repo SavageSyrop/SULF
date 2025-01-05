@@ -1,35 +1,40 @@
 import controller.MainController;
+import entity.FinancialOperation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
-import java.awt.*;
-import java.net.URI;
-import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+
+import static enums.FinancialOperationType.EXPENSE;
 
 @ComponentScan("")
 public class Main {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext app = SpringApplication.run(Main.class, args);
-        MainController managerImpl = app.getBean(MainController.class);
+        MainController mainController = app.getBean(MainController.class);
 
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Сервис сокращения ссылок\n" +
+        System.out.println("Сервис управления личными финансами\n" +
                 "Для выхода нажмите ctrl+d\n\n" +
                 "Для вызова команды введите её номер:\n" +
-                "1. Зарегистрироваться (получить UUID)\n" +
+                "1. Зарегистрироваться\n" +
                 "2. Выйти из аккаунта\n" +
-                "3. Авторизоваться (по UUID)\n" +
-                "4. Создать короткую ссылку\n" +
-                "5. Перейти по короткой ссылке\n" +
-                "6. Изменить количество переходов по короткой ссылке\n" +
-                "7. Удалить короткую ссылку\n" +
-                "8. Изменить время валидности короткой ссылки\n" +
-                "9. Получить UUID текущего пользователя\n" +
-                "10. Список актуальных коротких ссылок текущего пользователя\n");
+                "3. Авторизоваться\n" +
+                "4. Добавить расходы\n" +
+                "5. Добавить доходы\n" +
+                "6. Установить бюджет под категорию\n" +
+                "7. Показать все операции дохода\n" +
+                "8. Показать все операции расхода\n" +
+                "9. Показать данные по всем категориям\n" +
+                "10. Показать данные по конкретной категории\n" +
+                "11. Изменить бюджет по категории\n" +
+                "12. Узнать по каким категориям превышен бюджет\n" +
+                "13. Перевести средства на другой кошелёк\n");
 
         System.out.print("Ожидание ввода команды: ");
 
@@ -38,72 +43,120 @@ public class Main {
             try {
                 switch (command) {
                     case "1":
-                        System.out.println("Ваш UUID: " + managerImpl.register());
+                        System.out.print("Введите логин: ");
+                        String login = sc.nextLine();
+                        System.out.print("Введите пароль: ");
+                        String password = sc.nextLine();
+                        mainController.register(login, password);
+                        System.out.println("Вы зарегистрировались, теперь можете авторизоваться");
                         break;
                     case "2":
-                        managerImpl.logout();
+                        mainController.logout();
                         System.out.println("Вы вышли из пользователя");
                         break;
                     case "3":
-                        System.out.print("Введите UUID пользователя: ");
-                        String uuid = sc.nextLine();
-                        managerImpl.login(uuid);
+                        System.out.print("Введите логин пользователя: ");
+                        String loginA = sc.nextLine();
+                        System.out.print("Введите пароль пользователя: ");
+                        String passwordA = sc.nextLine();
+                        mainController.login(loginA, passwordA);
                         System.out.println("Вы вошли в пользователя");
                         break;
                     case "4":
-                        System.out.print("Введите ссылку для сокращения: ");
-                        String link = sc.nextLine();
-
-                        System.out.print("Введите максимальное число переходов по ссылке: ");
-                        long usagesCount = Long.parseLong(sc.nextLine());
-
-                        long validUntil = inputTimeInUnixSeconds();
-
-                        ShortUrl shortUrl = managerImpl.createUrl(link, usagesCount, validUntil);
-                        System.out.println("Создана короткая ссылка: " + shortUrl.getShortUrl());
+                        System.out.print("Введите данные в формате 'Категория:Количество денег': ");
+                        String dataR = sc.nextLine();
+                        String[] dataSplit = dataR.replace(" ", "").split(":");
+                        mainController.addExpense(dataSplit[0], Float.parseFloat(dataSplit[1]));
+                        System.out.println("Данные добавлены");
                         break;
                     case "5":
-                        System.out.print("Введите короткую ссылку для перехода по ней: ");
-                        String compressedUrl = sc.nextLine();
-                        String longUrl = managerImpl.useShortUrl(compressedUrl).getOriginalUrl();
-                        Desktop.getDesktop().browse(new URI(longUrl));
+                        System.out.print("Введите данные в формате 'Категория:Количество денег': ");
+                        String dataD = sc.nextLine();
+                        String[] dataSplitD = dataD.replace(" ", "").split(":");
+                        mainController.addIncome(dataSplitD[0], Float.parseFloat(dataSplitD[1]));
+                        System.out.println("Данные добавлены");
                         break;
                     case "6":
-                        System.out.print("Введите коротку ссылку для перехода по ней: ");
-                        String urlToChangeUsagesCount = sc.nextLine();
-
-                        System.out.print("Введите максимальное число переходов по ссылке: ");
-                        long newUsagesCount = Long.parseLong(sc.nextLine());
-                        managerImpl.editUrlUsageLimit(urlToChangeUsagesCount, newUsagesCount);
-                        System.out.println("Количество переходов обновлено");
+                        System.out.print("Введите данные в формате 'Категория:Размер бюджета': ");
+                        String dataB = sc.nextLine();
+                        String[] dataSplitB = dataB.replace(" ", "").split(":");
+                        mainController.addBudgetCategory(dataSplitB[0], Float.parseFloat(dataSplitB[1]));
+                        System.out.println("Данные добавлены");
                         break;
                     case "7":
-                        System.out.print("Введите короткую ссылку, которую хотите удалить: ");
-                        String urlToDelete = sc.nextLine();
-
-                        managerImpl.deleteUrlByShortUrl(urlToDelete);
-                        System.out.println("Ссылка удалена");
+                        List<FinancialOperation> list = mainController.getAllIncomeOperationsByCurrentUser();
+                        System.out.println("<---------------------------->");
+                        float total = 0;
+                        for (FinancialOperation operation : list) {
+                            total += operation.getPrice();
+                            System.out.println(operation.getCategoryName() + ": " + operation.getPrice());
+                        }
+                        System.out.println("Сумма по всем операциям: " + total);
+                        System.out.println("<---------------------------->");
                         break;
                     case "8":
-                        System.out.print("Введите короткую ссылку: ");
-                        String linkToChangeTime = sc.nextLine();
-
-                        long newValidUntil = inputTimeInUnixSeconds();
-                        managerImpl.editUrlTimeLimit(linkToChangeTime, newValidUntil);
-                        System.out.println("Данные обновлены");
+                        List<FinancialOperation> listE = mainController.getAllExpenseOperationsByCurrentUser();
+                        System.out.println("<---------------------------->");
+                        float totalE = 0;
+                        for (FinancialOperation operation : listE) {
+                            totalE += operation.getPrice();
+                            System.out.println(operation.getCategoryName() + ": " + operation.getPrice());
+                        }
+                        System.out.println("Сумма по всем операциям: " + totalE);
+                        System.out.println("<---------------------------->");
                         break;
                     case "9":
-                        String currentUser = managerImpl.whoAmI();
-                        if (currentUser==null) {
-                            System.out.println("Вы не авторизованы");
-                        } else {
-                            System.out.println("Ваш пользоваетель: " + currentUser);
+                        List<FinancialOperation> listA = mainController.getAllOperationsByCurrentUser();
+                        System.out.println("<---------------------------->");
+                        float totalA = 0;
+                        for (FinancialOperation operation : listA) {
+                            if (operation.getOperationType().equals(EXPENSE)) {
+                                totalA -= operation.getPrice();
+                            } else {
+                                totalA += operation.getPrice();
+                            }
+                            System.out.println(operation.getCategoryName() + ": " + operation.getPrice());
                         }
+                        System.out.println("Итог бюджета: " + totalA);
+                        System.out.println("<---------------------------->");
                         break;
                     case "10":
-                        for (ShortUrl entry: managerImpl.getUrlByCreatorUUID()) {
-                            System.out.println(entry.getShortUrl());
+                        System.out.print("Введите название категории: ");
+                        List<FinancialOperation> listSC = mainController.getAllOperationsBySelectedCategory();
+                        System.out.println("<---------------------------->");
+                        float totalSC = 0;
+                        for (FinancialOperation operation : listSC) {
+                            totalSC += operation.getPrice();
+                            System.out.println(operation.getCategoryName() + ": " + operation.getPrice());
                         }
+                        System.out.println("Сумма по всем операциям: " + totalSC);
+                        System.out.println("<---------------------------->");
+                        break;
+                    case "11":
+                        System.out.print("Введите данные в формате 'Категория:Размер бюджета'");
+                        String dataNB = sc.nextLine();
+                        String[] dataSplitNB = dataNB.replace(" ", "").split(":");
+                        mainController.editBudgetCategory(dataSplitNB[0], Float.parseFloat(dataSplitNB[1]));
+                        System.out.println("Категория отредактирована");
+                        break;
+                    case "12":
+                        Map<String, Float> budgetOverflows = mainController.getAllBudgetOverflows();
+                        System.out.println("<---------------------------->");
+                        float totalBO = 0;
+                        for (Map.Entry<String, Float> entry : budgetOverflows.entrySet()) {
+                            totalBO += entry.getValue();
+                            System.out.println(entry.getKey() + ": " + entry.getValue());
+                        }
+                        System.out.println("Итог превышения бюджета: " + totalBO);
+                        System.out.println("<---------------------------->");
+                        break;
+                    case "13":
+                        System.out.print("Укажите логин пользователя, которому будет производиться перевод: ");
+                        String userLogin = sc.nextLine();
+                        System.out.print("Укажите размер перевода: ");
+                        Float amount = Float.parseFloat(sc.nextLine());
+                        mainController.transferMoney(userLogin, amount);
+                        System.out.println("Перевод успешен");
                         break;
                     default:
                         System.out.println("Неверный номер команды");
@@ -113,35 +166,5 @@ public class Main {
             }
             System.out.print("Ожидание ввода команды: ");
         }
-    }
-
-    public static long inputTimeInUnixSeconds() throws Exception {
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Выберите в чём ввести время жизни ссылки\nМаксимальный период 1 месяц\n1 - в секундах\n2 - в минутах\n3 - в часах\n4 - в днях");
-        String choice = sc.nextLine();
-
-        long validUntil = Instant.now().getEpochSecond();
-        long inputValue;
-
-        System.out.print("Введите значение в выбранной величине: ");
-        inputValue = Long.parseLong(sc.nextLine());
-
-        switch (choice) {
-            case "1":
-                validUntil += inputValue;
-                break;
-            case "2":
-                validUntil += inputValue * 60;
-                break;
-            case "3":
-                validUntil += inputValue * 3600;
-                break;
-            case "4":
-                validUntil += inputValue * 86400;
-                break;
-            default:
-                throw new Exception("Неверный выбор формата ввода времени");
-        }
-        return validUntil;
     }
 }

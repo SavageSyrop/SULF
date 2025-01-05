@@ -1,9 +1,6 @@
 package entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -18,12 +15,17 @@ import java.util.Collection;
 @Getter
 @Setter
 @ToString
+@RequiredArgsConstructor
 @NoArgsConstructor
 public class User extends AbstractEntity implements UserDetails {
     @Column
     private String login;
     @Column
     private String password;
+
+    public User(String login, String password) {
+
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
