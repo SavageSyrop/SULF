@@ -94,10 +94,10 @@ public class MainController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    public List<FinancialOperation> getAllOperationsBySelectedCategory() {
+    public List<FinancialOperation> getAllOperationsBySelectedCategory(String selectedCategory) {
         User user = userService.getCurrentUser();
 
-        return financialOperationService.getAllOperationsBySelectedCategory(user);
+        return financialOperationService.getAllOperationsBySelectedCategory(user, selectedCategory);
     }
 
     @PreAuthorize("isAuthenticated()")

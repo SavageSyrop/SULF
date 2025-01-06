@@ -122,7 +122,8 @@ public class Main {
                         break;
                     case "10":
                         System.out.print("Введите название категории: ");
-                        List<FinancialOperation> listSC = mainController.getAllOperationsBySelectedCategory();
+                        String selectedCategory = sc.nextLine();
+                        List<FinancialOperation> listSC = mainController.getAllOperationsBySelectedCategory(selectedCategory);
                         System.out.println("<---------------------------->");
                         float totalSC = 0;
                         for (FinancialOperation operation : listSC) {
