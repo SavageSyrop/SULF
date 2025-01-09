@@ -1,11 +1,11 @@
-package service;
+package org.example.service;
 
-import dao.CategoryBudgetDao;
-import dao.FinancialOperationDao;
-import entity.CategoryBudget;
-import entity.FinancialOperation;
-import entity.User;
-import enums.FinancialOperationType;
+import org.example.dao.CategoryBudgetDao;
+import org.example.dao.FinancialOperationDao;
+import org.example.entity.CategoryBudget;
+import org.example.entity.FinancialOperation;
+import org.example.entity.User;
+import org.example.enums.FinancialOperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

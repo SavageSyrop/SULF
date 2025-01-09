@@ -5,24 +5,27 @@ volumes:
     driver: local
 services:
   db:
+    container_name: db
     image: postgres
     restart: always
     ports:
       - "5432:5432"
     environment:
       - PGUSER=desertfox
-      - POSTGRES_USER=desertfox
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=localData
+      - POSTGRES_DB=sulfData
       - POSTGRES_HOST_AUTH_METHOD=trust
       - POSTGRES_INITDB_ARGS=--auth-host=trust
     volumes:
       - db-data:/var/lib/postgresql/data
-  app:
-    container_name: sulf
-    image: sulf
-    build: ./
-    ports:
-      - "8089:8089"
-    depends_on:
-      - db
+#  app:
+#    container_name: sulf
+#    image: sulf
+#    build: ./
+#    stdin_open: true
+#    tty: true
+#    ports:
+#      - "8089:8089"
+#    depends_on:
+#      - db

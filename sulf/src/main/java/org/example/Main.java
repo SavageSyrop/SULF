@@ -1,20 +1,29 @@
-import controller.MainController;
-import entity.FinancialOperation;
+package org.example;
+
+import org.example.controller.MainController;
+import org.example.entity.FinancialOperation;
+import org.example.utils.FlywayInitializer;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import static enums.FinancialOperationType.EXPENSE;
+import static org.example.enums.FinancialOperationType.EXPENSE;
 
-@ComponentScan("")
+
+@SpringBootApplication(scanBasePackages = "org.example")
+@EnableTransactionManagement
+@EnableJpaRepositories("org.example")
 public class Main {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext app = SpringApplication.run(Main.class, args);
+        app.getBean(FlywayInitializer.class).initialize();
         MainController mainController = app.getBean(MainController.class);
 
         Scanner sc = new Scanner(System.in);

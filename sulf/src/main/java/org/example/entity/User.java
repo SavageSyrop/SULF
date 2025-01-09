@@ -1,4 +1,4 @@
-package entity;
+package org.example.entity;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,16 +15,16 @@ import java.util.Collection;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @NoArgsConstructor
 public class User extends AbstractEntity implements UserDetails {
     @Column
-    private String login;
+    private String username;
     @Column
     private String password;
 
-    public User(String login, String password) {
-
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class User extends AbstractEntity implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.login;
+        return this.username;
     }
 
     @Override

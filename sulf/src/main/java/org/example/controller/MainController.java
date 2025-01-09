@@ -1,15 +1,15 @@
-package controller;
+package org.example.controller;
 
-import entity.CategoryBudget;
-import entity.FinancialOperation;
-import entity.User;
-import enums.FinancialOperationType;
+import org.example.entity.CategoryBudget;
+import org.example.entity.FinancialOperation;
+import org.example.entity.User;
+import org.example.enums.FinancialOperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import service.FinancialOperationService;
-import service.UserService;
+import org.example.service.FinancialOperationService;
+import org.example.service.UserService;
 
 import java.util.List;
 import java.util.Map;

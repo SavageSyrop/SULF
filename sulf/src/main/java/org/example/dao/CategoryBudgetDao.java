@@ -1,6 +1,6 @@
-package dao;
+package org.example.dao;
 
-import entity.CategoryBudget;
+import org.example.entity.CategoryBudget;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
