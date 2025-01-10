@@ -19,10 +19,18 @@ public class FinancialOperation extends AbstractEntity {
     private String categoryName;
     @Column
     private Float price;
+    @Column(name = "operation_type", columnDefinition = "enum('INCOME','EXPENSE')")
     @Enumerated(EnumType.STRING)
-    @Column
     private FinancialOperationType operationType;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User owner;
+
+    public void setOperationType(String operationType) {
+        this.operationType = FinancialOperationType.valueOf(operationType);
+    }
+
+    public void setOperationType(FinancialOperationType operationType) {
+        this.operationType = operationType;
+    }
 }

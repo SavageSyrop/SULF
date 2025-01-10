@@ -9,10 +9,7 @@ import org.example.enums.FinancialOperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class FinancialOperationService {
@@ -30,8 +27,8 @@ public class FinancialOperationService {
         return categoryBudgetDao.save(categoryBudget);
     }
 
-    public CategoryBudget getCategoryByUser(Long id, String categoryName) {
-        Optional<CategoryBudget> categoryBudgetOp = categoryBudgetDao.findByOwnerAndCategoryName(id, categoryName);
+    public CategoryBudget getCategoryByUser(User user, String categoryName) {
+        Optional<CategoryBudget> categoryBudgetOp = categoryBudgetDao.findByOwnerAndCategoryName(user, categoryName);
         if (categoryBudgetOp.isEmpty()) {
             throw new IllegalArgumentException(categoryName + " нет у текущего пользователя");
         }
@@ -39,36 +36,51 @@ public class FinancialOperationService {
     }
 
     public List<FinancialOperation> getAllIncomeOperationsByCurrentUser(User user) {
-        return financialOperationDao.findAllByOwnerAndOperationType(user.getId(), FinancialOperationType.INCOME.name());
+        return financialOperationDao.findAllByOwnerAndOperationType(user, FinancialOperationType.INCOME);
     }
 
     public List<FinancialOperation> getAllExpenseOperationsByCurrentUser(User user) {
-        return financialOperationDao.findAllByOwnerAndOperationType(user.getId(), FinancialOperationType.EXPENSE.name());
+        return financialOperationDao.findAllByOwnerAndOperationType(user, FinancialOperationType.EXPENSE);
     }
 
     public List<FinancialOperation> getAllOperationsByCurrentUser(User user) {
-        return financialOperationDao.findAllByOwner(user.getId());
+        return financialOperationDao.findAllByOwner(user);
     }
 
     public List<FinancialOperation> getAllOperationsBySelectedCategory(User user, String selectedCategory) {
-        return financialOperationDao.findAllByOwnerAndCategoryName(user.getId(), selectedCategory);
+        return financialOperationDao.findAllByOwnerAndCategoryName(user, selectedCategory);
     }
 
     public Map<String, Float> getAllBudgetOverflows(User user) {
-        List<FinancialOperation> allOps = financialOperationDao.findAllByOwner(user.getId());
+        List<FinancialOperation> allOps = financialOperationDao.findAllByOwner(user);
 
         Map<String, Float> mappedBudget = new HashMap<>();
-        for (FinancialOperation financialOperation: allOps) {
-            if (financialOperation.getOperationType().equals(FinancialOperationType.INCOME)) {
-                float currentVal = mappedBudget.getOrDefault(financialOperation.getCategoryName(), 0f);
-                currentVal+= financialOperation.getPrice();
-                mappedBudget.put(financialOperation.getCategoryName(), currentVal);
-            } else {
-                float currentVal = mappedBudget.getOrDefault(financialOperation.getCategoryName(), 0f);
-                currentVal-= financialOperation.getPrice();
-                mappedBudget.put(financialOperation.getCategoryName(), currentVal);
+        Map<String, Float> resMap = new HashMap<>();
+
+        Set<CategoryBudget> budgets = new LinkedHashSet<>();
+        for (FinancialOperation financialOperation : allOps) {
+            if (FinancialOperationType.EXPENSE.equals(financialOperation.getOperationType())) {
+                CategoryBudget budget = categoryBudgetDao.findByOwnerAndCategoryName(user, financialOperation.getCategoryName()).orElse(null);
+                if (budget != null) {
+                    budgets.add(budget);
+                    float found = mappedBudget.getOrDefault(financialOperation.getCategoryName(), 0f);
+                    found -= financialOperation.getPrice();
+                    mappedBudget.put(financialOperation.getCategoryName(), found);
+                }
             }
         }
-        return mappedBudget;
+
+        for (CategoryBudget categoryBudget : budgets) {
+            float found = mappedBudget.get(categoryBudget.getCategoryName());
+            found += categoryBudget.getBudgetSize();
+            if (found < 0) {
+                resMap.put(categoryBudget.getCategoryName(), found);
+            }
+        }
+        return resMap;
+    }
+
+    public List<CategoryBudget> getAllBudgetsByUser(User owner) {
+        return categoryBudgetDao.findAllByOwner(owner);
     }
 }

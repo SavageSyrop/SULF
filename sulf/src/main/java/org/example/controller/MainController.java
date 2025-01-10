@@ -66,7 +66,7 @@ public class MainController {
     @PreAuthorize("isAuthenticated()")
     public void editBudgetCategory(String category, float price) {
         User user = userService.getCurrentUser();
-        CategoryBudget categoryBudget = financialOperationService.getCategoryByUser(user.getId(), category);
+        CategoryBudget categoryBudget = financialOperationService.getCategoryByUser(user, category);
         categoryBudget.setBudgetSize(price);
         financialOperationService.addBudgetCategory(categoryBudget);
 
@@ -123,5 +123,19 @@ public class MainController {
         operationIncome.setCategoryName("Перевод");
         operationIncome.setOwner(userService.getUserByLogin(userLogin));
         financialOperationService.addFinancialOperation(operationIncome);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    public List<CategoryBudget> getAllBudgetsByUser() {
+        User user = userService.getCurrentUser();
+
+        return financialOperationService.getAllBudgetsByUser(user);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    public CategoryBudget getBudgetByCategory(String selectedCategory) {
+        User user = userService.getCurrentUser();
+
+        return financialOperationService.getCategoryByUser(user, selectedCategory);
     }
 }

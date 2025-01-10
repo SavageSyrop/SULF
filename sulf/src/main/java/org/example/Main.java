@@ -1,12 +1,14 @@
 package org.example;
 
 import org.example.controller.MainController;
+import org.example.entity.CategoryBudget;
 import org.example.entity.FinancialOperation;
 import org.example.utils.FlywayInitializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.List;
@@ -43,7 +45,8 @@ public class Main {
                 "10. Показать данные по конкретной категории\n" +
                 "11. Изменить бюджет по категории\n" +
                 "12. Узнать по каким категориям превышен бюджет\n" +
-                "13. Перевести средства на другой кошелёк\n");
+                "13. Перевести средства на другой кошелёк\n" +
+                "14. Показать все бюджетные лимиты\n");
 
         System.out.print("Ожидание ввода команды: ");
 
@@ -121,29 +124,51 @@ public class Main {
                         for (FinancialOperation operation : listA) {
                             if (operation.getOperationType().equals(EXPENSE)) {
                                 totalA -= operation.getPrice();
+                                System.out.println("Расход " + operation.getCategoryName() + ": " + -1 * operation.getPrice());
                             } else {
                                 totalA += operation.getPrice();
+                                System.out.println("Доход " + operation.getCategoryName() + ": " + operation.getPrice());
                             }
-                            System.out.println(operation.getCategoryName() + ": " + operation.getPrice());
                         }
-                        System.out.println("Итог бюджета: " + totalA);
+                        System.out.println("Итог по сумме расходов и доходов: " + totalA);
                         System.out.println("<---------------------------->");
                         break;
                     case "10":
                         System.out.print("Введите название категории: ");
                         String selectedCategory = sc.nextLine();
                         List<FinancialOperation> listSC = mainController.getAllOperationsBySelectedCategory(selectedCategory);
+                        CategoryBudget budget;
+                        try {
+                            budget = mainController.getBudgetByCategory(selectedCategory);
+                        } catch (IllegalArgumentException e) {
+                            budget = null;
+                        }
                         System.out.println("<---------------------------->");
                         float totalSC = 0;
                         for (FinancialOperation operation : listSC) {
-                            totalSC += operation.getPrice();
-                            System.out.println(operation.getCategoryName() + ": " + operation.getPrice());
+                            if (operation.getOperationType().equals(EXPENSE)) {
+                                totalSC -= operation.getPrice();
+                                System.out.println("Расход " + operation.getCategoryName() + ": " + -1 * operation.getPrice());
+                            } else {
+                                totalSC += operation.getPrice();
+                                System.out.println("Доход " + operation.getCategoryName() + ": " + operation.getPrice());
+                            }
                         }
                         System.out.println("Сумма по всем операциям: " + totalSC);
+                        if (budget == null || totalSC > 0) {
+                            System.out.println("Бюджет не определен");
+                        } else {
+                            float res = budget.getBudgetSize() + totalSC;
+                            if (res < 0) {
+                                System.out.println("Бюджет превышен на :" + Math.abs(res));
+                            } else {
+                                System.out.println("Остаток бюджета по категории: " + res);
+                            }
+                        }
                         System.out.println("<---------------------------->");
                         break;
                     case "11":
-                        System.out.print("Введите данные в формате 'Категория:Размер бюджета'");
+                        System.out.print("Введите данные в формате 'Категория:Размер бюджета': ");
                         String dataNB = sc.nextLine();
                         String[] dataSplitNB = dataNB.replace(" ", "").split(":");
                         mainController.editBudgetCategory(dataSplitNB[0], Float.parseFloat(dataSplitNB[1]));
@@ -157,7 +182,11 @@ public class Main {
                             totalBO += entry.getValue();
                             System.out.println(entry.getKey() + ": " + entry.getValue());
                         }
-                        System.out.println("Итог превышения бюджета: " + totalBO);
+                        if (totalBO<0) {
+                            System.out.println("Суммарное превышение бюджетов: " + totalBO);
+                        } else {
+                            System.out.println("Превышений бюджета нет");
+                        }
                         System.out.println("<---------------------------->");
                         break;
                     case "13":
@@ -167,6 +196,17 @@ public class Main {
                         Float amount = Float.parseFloat(sc.nextLine());
                         mainController.transferMoney(userLogin, amount);
                         System.out.println("Перевод успешен");
+                        break;
+                    case "14":
+                        List<CategoryBudget> listB = mainController.getAllBudgetsByUser();
+                        System.out.println("<---------------------------->");
+                        float totalB = 0;
+                        for (CategoryBudget budgetE : listB) {
+                            totalB += budgetE.getBudgetSize();
+                            System.out.println(budgetE.getCategoryName() + ": " + budgetE.getBudgetSize());
+                        }
+                        System.out.println("Сумма категорий бюджетов: " + totalB);
+                        System.out.println("<---------------------------->");
                         break;
                     default:
                         System.out.println("Неверный номер команды");
